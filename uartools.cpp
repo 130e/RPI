@@ -7,6 +7,8 @@
 #define AUTO 0x05
 //#define BLINK 0x06
 
+#define MAX_CMDLEN 60
+
 int uartsetup()
 {
 	//-------------------------
@@ -108,6 +110,7 @@ int recebytes(int uart0_filestream, unsigned char* rx_pbuffer)//while query
 	return rx_length;
 }
 
+// lighton for self
 int lighton(int uart0_filestream, int interval)
 {
 	unsigned char tx_buffer[10];
@@ -129,6 +132,7 @@ int lighton(int uart0_filestream, int interval)
 	return transbytes(uart0_filestream, &tx_buffer[0], 8);
 }
 
+// get self address
 int getaddr(int uart0_filestream)
 {
 	unsigned char tx_buffer[10];
@@ -145,16 +149,16 @@ int getaddr(int uart0_filestream)
 	return transbytes(uart0_filestream, &tx_buffer[0], 8);
 }
 
-int pksend(int uartfd, char cmd, char chn)//only 1 byte of node
+int pksend(int uartfd, char cmd, char chaddr)//only 1 byte of node
 {
 	unsigned char tx_buffer[8];
-	
+	// addr is little endian
 	tx_buffer[0] = 0xFE;
 	tx_buffer[1] = 0x05;
 	tx_buffer[2] = 0x90;
 	tx_buffer[3] = 0x90;
-	tx_buffer[4] = chn;
-	tx_buffer[5] = 0x00;
+	tx_buffer[4] = chaddr[1];
+	tx_buffer[5] = chaddr[0];
 	tx_buffer[6] = cmd;
 	tx_buffer[7] = 0xFF;
 	
@@ -162,46 +166,71 @@ int pksend(int uartfd, char cmd, char chn)//only 1 byte of node
 }
 
 
+void transaddr(char* srcaddr, char* dstaddr)
+{
+	for(i=0;i<2;i++)
+	{
+		*dstaddr = 0x00;
+		if(*srcaddr < 0x39)
+			*dstaddr += (*srcaddr - 0x30) *0x10;
+		else
+			*dstaddr += (*srcaddr - 0x37) *0x10;
+		srcaddr++;
+		if(*srcaddr < 0x39)
+			*dstaddr += *srcaddr - 0x30;
+		else
+			*dstaddr += *srcaddr - 0x37;
+		srcaddr++;
+		dstaddr++;
+	}
+}
+
 void adminloop(int uartfd)
 {
 	printf("<LIGHT SYSTEM ADMIN CONSOLE>--------\n");
-	char cmd[60];
-	char chn;
-	//input: on 1
+	printf("->(Input full addr)");
+	char cmd[MAX_CMDLEN];
+	char chaddr[2] = {0};
+	//input: on 0001
 	while(1)
 	{
 		printf(">>");
-		if (fgets(cmd, 60, stdin)!=NULL)
+		if (fgets(cmd, MAX_CMDLEN, stdin)!=NULL)
 		{
 			char* cp = cmd;
 			while(*cp==0x20)
 				cp++;
 			switch (cmd[1])
 			{
-				case 'N':
+				case 'N':	// on
 				case 'n':
-					chn = cmd[3] - 0x30;
-					pksend(uartfd, ON, chn);
+					//chn = cmd[3] - 0x30;
+					transaddr(&cmd[3], chaddr);
+					pksend(uartfd, ON, chaddr);
 					break;
-				case 'F':
+				case 'F':	// off
 				case 'f':
-					chn = cmd[4] - 0x30;
-					pksend(uartfd, OFF, chn);
+					//chn = cmd[4] - 0x30;
+					transaddr(&cmd[4], chaddr);
+					pksend(uartfd, OFF, chaddr);
 					break;
-				case 'R':
+				case 'R':	// brighter
 				case 'r':
-					chn = cmd[9] - 0x30;
-					pksend(uartfd, BRIGHTER, chn);
+					//chn = cmd[9] - 0x30;
+					transaddr(&cmd[9], chaddr);
+					pksend(uartfd, BRIGHTER, chaddr);
 					break;
-				case 'A':
+				case 'A':	//darker
 				case 'a':
-					chn = cmd[7] - 0x30;
-					pksend(uartfd, DARKER, chn);
+					//chn = cmd[7] - 0x30;
+					transaddr(&cmd[7], chaddr);
+					pksend(uartfd, DARKER, chaddr);
 					break;
-				case 'U':
+				case 'U':	//auto
 				case 'u':
-					chn = cmd[3] - 0x30;
-					pksend(uartfd, AUTO, chn);
+					//chn = cmd[3] - 0x30;
+					transaddr(&cmd[3], chaddr);
+					pksend(uartfd, AUTO, chaddr);
 					break;
 				default:
 					printf("Unknown cmd\n");
