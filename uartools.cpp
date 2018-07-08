@@ -214,7 +214,6 @@ void adminloop(int uartfd)
 					lighton(uartfd, 50);
 					break;
 				default:
-					printf("Unknown cmd\n");
 					break;
 			}		
 		}
