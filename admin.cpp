@@ -38,7 +38,7 @@ int main()
 	{
 		//parent
 		int rx_len = 0;
-		int logfd = open("sensor.log", O_RDWR | O_CREAT | O_APPEND, S_IRWXU);
+		int logfd = open("sensor.log", O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 		if (logfd < 0 )
 			printf("file error");
 		
