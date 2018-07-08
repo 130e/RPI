@@ -203,6 +203,16 @@ void adminloop(int uartfd)
 					chn = cmd[3] - 0x30;
 					pksend(uartfd, AUTO, chn);
 					break;
+				case 'E':
+				case 'e':
+					// get local address
+					getaddr(uartfd);
+					break;
+				case 'I':
+				case 'i':
+					// light local 
+					lighton(uartfd, 50);
+					break;
 				default:
 					printf("Unknown cmd\n");
 					break;
