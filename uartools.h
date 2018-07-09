@@ -16,4 +16,6 @@ int getaddr(int uart0_filestream);
 
 int pksend(int uartfd, char cmd, char chn);
 
+int byte2str(char* byte_buffer, char* str_buffer);
+
 void adminloop(int uartfd);

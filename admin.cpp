@@ -3,21 +3,16 @@
 #include <string.h>
 #include <time.h>
 
-int logwrite(int logfd, char* rx_buffer)
+
+int logwrite(int logfd, char* buffer)
 {
-	char wr_buffer[255];
+	char wr_buffer[255] = {0};
 	time_t timep = time(NULL);
 	strcpy(wr_buffer, ctime(&timep));
-	strcat(wr_buffer, " ");
-	strcat(wr_buffer, rx_buffer);//trans to str
+	strcat(wr_buffer, buffer);//trans to str
 	strcat(wr_buffer, "\n");
 	
-	char* ptr = wr_buffer;
-	int len = 0;
-	while(*ptr != 0xff)
-		len++;
-	
-	write(logfd, wr_buffer, len);
+	write(logfd, wr_buffer, strlen(wr_buffer));
 }
 
 
@@ -26,7 +21,6 @@ int main()
 	int uartfd = uartsetup();
 	
 	//to do
-	unsigned char rx_buffer[255];
 	
 	pid_t pid = fork();
 	if (pid == 0)
@@ -38,6 +32,8 @@ int main()
 	{
 		//parent
 		int rx_len = 0;
+		unsigned char rx_buffer[64];
+		char str_buffer[128];
 		int logfd = open("sensor.log", O_RDWR | O_CREAT | O_APPEND, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP);
 		if (logfd < 0 )
 			printf("file error");
@@ -51,9 +47,10 @@ int main()
 			else
 				switch (rx_buffer[3])
 				{
-					case 0x90:
+					case 0x91:
 						//sensor triggered
-						logwrite(logfd, (char*)rx_buffer);
+						byte2str((char*)rx_buffer, str_buffer);
+						logwrite(logfd, str_buffer);
 						break;
 					default:
 						break;

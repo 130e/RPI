@@ -6,6 +6,7 @@
 #define DARKER 0x04
 #define AUTO 0x05
 //#define BLINK 0x06
+#define MAX_LEN 64
 
 int uartsetup()
 {
@@ -79,7 +80,7 @@ int recebytes(int uart0_filestream, unsigned char* rx_pbuffer)//while query
 	while(1)
 	{
 		int rc_len = 0;
-		rc_len = read(uart0_filestream, (void*)cp, 255);
+		rc_len = read(uart0_filestream, (void*)cp, MAX_LEN);
 		if (rc_len ==-1)
 		{
 			if ((errno == EAGAIN) || (errno == EINTR))
@@ -161,6 +162,33 @@ int pksend(int uartfd, char cmd, char chn)//only 1 byte of node
 	return transbytes(uartfd, &tx_buffer[0], 8);
 }
 
+int byte2str(char* byte_buffer, char* str_buffer)
+{
+	int ich = 0;
+	int len = 0;
+	char* sp = str_buffer;
+	for(char* p=byte_buffer;*p!=0xff;p++)
+	{
+		ich = (int)*p / 0x10;
+		if(ich<0x0a)
+			*sp = ich + 0x30;
+		else
+			*sp = ich + 0x37;
+		sp++;
+		ich = (int)*p % 0x10;
+		if(ich<0x0a)
+			*sp = ich + 0x30;
+		else
+			*sp = ich + 0x37;
+		sp++;
+		len += 2;
+	}
+	*sp++ = 'F';
+	*sp++ = 'F';
+	*sp = 0x00;
+	len+=2;
+	return len;
+}
 
 void adminloop(int uartfd)
 {
