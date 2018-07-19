@@ -2,6 +2,7 @@
 
 #include <string.h>
 #include <time.h>
+#include <sqlite3.h>
 
 int logwrite(int logfd, char* rx_buffer)
 {
@@ -65,7 +66,7 @@ int main()
 					int rc;
 					char sql[255] = "INSERT INTO SENSOR (SID, TIME) VALUES ";
 					// open db
-					rc = sqlite3_open("sensor_log.db", &db);
+					rc = sqlite3_open("flask.db", &db);
 					if (rc)
 						printf("Can't open database: %s\n", sqlite3_errmsg(db));
 					// (1, date)
