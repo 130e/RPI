@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <meta http-equiv="refresh" content="5">
+    <title>Document</title>
+</head>
+
+<body>
+    <!-- <select name="sensors" id="sensors" onchange="show(this.value)">
+        <option value="0" selected='selected'>all</option>
+       <option value="1" >1</option>
+       <option value="2">2</option>
+    </select> -->
+    <div id="sensor1" style="display: inline-table">
+        <table>
+            {% for time in sensor1 %}
+            <tr>
+                <th>1</th>
+                <th>{{time.time}}</th>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="sensor2" style="display: inline-table">
+        <table>
+            {% for time in sensor2 %}
+            <tr>
+                <th>2</th>
+                <th>{{time.time}}</th>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+    <div id="all" style="display: none">
+        <table>
+            {% for data in all %}
+            <tr>
+                <th>{{data.sensor}}</th>
+                <th>{{data.time}}</th>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+</body>
+<script>
+    function show(index) {
+        if (index == 1) {
+            document.getElementById('sensor1').style.display = 'block';
+            document.getElementById('sensor2').style.display = 'none';
+            document.getElementById('all').style.display = 'none';
+        } else if (index == 2) {
+            document.getElementById('sensor1').style.display = 'none';
+            document.getElementById('sensor2').style.display = 'block';
+            document.getElementById('all').style.display = 'none';
+        } else {
+            document.getElementById('sensor1').style.display = 'none';
+            document.getElementById('sensor2').style.display = 'none';
+            document.getElementById('all').style.display = 'block';
+        }
+    }
+</script>
+
+</html>
